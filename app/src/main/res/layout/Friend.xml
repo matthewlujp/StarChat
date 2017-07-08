@@ -1,96 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="jp.ac.u_tokyo.constellationmatching.LogIn">
+    android:orientation="vertical"
+    android:background="@drawable/background1"
+    android:gravity="center_horizontal">
+
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:fontFamily="serif"
+        android:text="Let's chat!"
+        android:textAlignment="center"
+        android:textColor="#99ffff"
+        android:textSize="30sp" />
+
+    <ImageButton
+        android:id="@+id/ChatIcon"
+        android:layout_width="301dp"
+        android:layout_height="207dp"
+        android:layout_marginTop="20dp"
+        android:background="#00000000"
+        android:scaleType="centerInside"
+        app:srcCompat="@drawable/chat" />
+
+    <ImageButton
+        android:id="@+id/HomeIcon"
+        android:layout_width="147dp"
+        android:layout_height="105dp"
+        android:layout_marginTop="30dp"
+        android:background="#00000000"
+        android:scaleType="centerInside"
+        app:srcCompat="@drawable/home" />
+
+
+</LinearLayout>
 
 
 
-    <LinearLayout
-        android:layout_width="368dp"
-        android:layout_height="495dp"
-        android:orientation="vertical"
-        tools:layout_editor_absoluteY="8dp"
-        tools:layout_editor_absoluteX="8dp"
-        android:background="@drawable/Background1">
-
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="450dp"
-            android:orientation="vertical">
-
-
-            <TextView
-                android:id="@+id/textView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="同じ星座を見ている人" />
-
-            <Button
-                android:id="@+id/button15"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="友達のプロフィール"
-                tools:layout_editor_absoluteX="190dp"
-                tools:layout_editor_absoluteY="256dp" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="horizontal">
-
-                <Button
-                    android:id="@+id/button14"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="友達になる"
-                    tools:layout_editor_absoluteX="36dp"
-                    tools:layout_editor_absoluteY="299dp" />
-
-                <Button
-                    android:id="@+id/button13"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="チャット"
-                    tools:layout_editor_absoluteX="102dp"
-                    tools:layout_editor_absoluteY="180dp" />
-
-
-
-            </LinearLayout>
-
-
-
-
-        </LinearLayout>
-
-
-
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:orientation="horizontal"
-            tools:layout_editor_absoluteY="8dp"
-            tools:layout_editor_absoluteX="8dp">
-
-            <Button
-                android:id="@+id/button16"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="ホーム"
-                tools:layout_editor_absoluteX="8dp"
-                tools:layout_editor_absoluteY="0dp" />
-        </LinearLayout>
-
-
-    </LinearLayout>
-
-</android.support.constraint.ConstraintLayout>

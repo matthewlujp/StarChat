@@ -8,6 +8,6 @@ public class Friend extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.LogIn);
+        setContentView(R.layout.friend);
     }
 }
