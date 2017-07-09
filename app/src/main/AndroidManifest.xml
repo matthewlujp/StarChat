@@ -22,7 +22,7 @@
         <activity android:name=".LogIn" />
         <activity android:name=".Friend" />
         <activity android:name=".Intro" />
-        <activity android:name=".SubActivity4"></activity>
+        <activity android:name=".Chat"></activity>
     </application>
 
 </manifest>

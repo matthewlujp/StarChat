@@ -7,6 +7,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -25,12 +26,13 @@ import com.androidquery.callback.AjaxStatus;
 
 import org.apache.http.HttpStatus;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 
-public class MainActivity extends AppCompatActivity implements SensorEventListener {
+public class MainActivity extends AppCompatActivity implements SensorEventListener, View.OnClickListener {
     private final int requestCodeFromLogin = 1001;
     protected final static double RAD2DEG = 180/Math.PI;
 
@@ -53,23 +55,22 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private ImageView orionConstellation;
     private ImageView swanConstellation;
     private ImageView dracoConstellation;
-    private ImageButton startChatButton;
+    private TextView welcomeTextBox;
 
-    ConstellationManager constellationManeger;
-
-    private EditText editTextName;
-    private EditText editTextMessage;
-    private Button buttonSubmit;
-    private Button buttonLoad;
-    private ListView listView;
+    TextView partnerNameBox;
+    ImageButton chatStartButton;
 
     private AQuery aQuery;
 
     /* User info */
-    private String userName = "TOM";
+    private String userName = "";
     private int userSex = 0; /* male:0 female: 1 */
+    private String partenerName = "";
 
-    private String serverUrl = "https://script.google.com/macros/s/AKfycbx1A6vCyxNrtMTR2tt7wMB872ztTG6eUzbCefCZZFwXFZ-34jzt/exec";
+    public static final String serverUrl = "https://script.google.com/macros/s/AKfycbx1A6vCyxNrtMTR2tt7wMB872ztTG6eUzbCefCZZFwXFZ-34jzt/exec";
+
+    private Handler mHandler;
+    private Runnable pollingRunner;
 
 
     @Override
@@ -83,12 +84,30 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         aQuery = new AQuery(this);
         initSensor();
+        mHandler = new Handler();
 
         dummyConstellation = (ImageView)findViewById(R.id.dummyImage);
         orionConstellation = (ImageView)findViewById(R.id.orionImage);
         swanConstellation = (ImageView)findViewById(R.id.swanImage);
         dracoConstellation = (ImageView)findViewById(R.id.dracoImage);
-        startChatButton = (ImageButton)findViewById(R.id.startChatButton);
+        partnerNameBox = (TextView) findViewById(R.id.chatPartnerName);
+        chatStartButton = (ImageButton) findViewById(R.id.startChatButton);
+        //welcomeTextBox = (TextView)findViewById(R.id.)
+
+        chatStartButton.setOnClickListener(this);
+
+        /* Add polling every second */
+        pollingRunner = new Runnable() {
+            public void run() {
+                // Polling to the server
+                polling(userName);
+                //Toast.makeText(MainActivity.this, "asd", Toast.LENGTH_SHORT).show();
+
+                mHandler.removeCallbacks(pollingRunner);
+                mHandler.postDelayed(pollingRunner, 1000);
+            }
+        };
+        mHandler.postDelayed(pollingRunner, 1000);
 
     }
 
@@ -111,6 +130,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD),
                 SensorManager.SENSOR_DELAY_GAME);
 
+
     }
 
 
@@ -121,12 +141,22 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
 
+    @Override
+    public void onClick(View view) {
+        Intent intent = new Intent(this, Chat.class);
+        intent.putExtra("userName", userName);
+        intent.putExtra("partnerName", partenerName);
+        startActivity(intent);
+
+    }
 
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
         if (requestCode == requestCodeFromLogin) {
             if (resultCode == Activity.RESULT_OK) {
                 userName = intent.getStringExtra("name");
-                Toast.makeText(this, userName, Toast.LENGTH_LONG).show();
+                //Toast.makeText(this, userName, Toast.LENGTH_LONG).show();
+                String welcomeMessage = String.format("Welcome %s !\nLook up in the sky.", userName);
+
             }
         }
     }
@@ -218,16 +248,47 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
 
+
+
+
     private void polling(String name) {
         /* 読み込み完了時のコールバック（ここではJSONObjectの例を示したが、JSONArrayやStringも指定可能） */
         AjaxCallback<JSONObject> callback = new AjaxCallback<JSONObject>() {
             @Override
             public void callback(String url, JSONObject root, AjaxStatus status) {
                 /* HTTPステータスコードが200なら */
-                if (status.getCode() == HttpStatus.SC_OK) {
+                //Toast.makeText(MainActivity.this, url, Toast.LENGTH_SHORT).show();
+                if (isConstellationFound) {
 
+                    if (status.getCode() == HttpStatus.SC_OK) {
+                        JSONArray friends = root.optJSONArray("matching");
+                        //Toast.makeText(MainActivity.this, friends.toString(), Toast.LENGTH_SHORT).show();
+                        String strfriends = friends.toString();
+                        strfriends = strfriends.substring(1, strfriends.length() - 1);
+                        strfriends = strfriends.replace("\"", "");
+                        String[] friendsArray = strfriends.toString().split(",");
+
+                        /*
+                        for (int i = 0; i < friendsArray.length; i++) {
+                            String friendName = friendsArray[i];
+                            Toast.makeText(MainActivity.this, friendName, Toast.LENGTH_SHORT).show();
+                        }
+                        */
+
+                        // Chat with the first person
+                        partenerName = friendsArray[0];
+
+                        if (partenerName != "") {
+                            chatStartButton.setVisibility(View.VISIBLE);
+                            partnerNameBox.setVisibility(View.VISIBLE);
+                            String chatPrompt = String.format("Let's connect with %s !", partenerName);
+                            partnerNameBox.setText(chatPrompt);
+                        }
+
+                    }
 
                 }
+
             }
         };
 
@@ -241,37 +302,37 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
 
-    private void submitMessage(String name, String message) {
-        /* 読み込み完了時のコールバック（ここではJSONObjectの例を示したが、JSONArrayやStringも指定可能） */
-        AjaxCallback<JSONObject> callback = new AjaxCallback<JSONObject>() {
-            @Override
-            public void callback(String url, JSONObject root, AjaxStatus status) {
-                /* HTTPステータスコードが200なら */
-                if (status.getCode() == HttpStatus.SC_OK) {
-                    JSONArray array = root.optJSONArray("chat");
-                    ArrayList<Message> messageList = Message.parse(array);
-                    MessageAdapter adapter = new MessageAdapter(MainActivity.this, messageList);
-                    listView.setAdapter(adapter);
-                }
-            }
-        };
-        /* URLとメソッドをセット */
-        callback.url(serverUrl);
-        callback.method(AQuery.METHOD_GET);
-
-        /* パラメータをセット */
-        if (name != null && message != null) {
-            callback.param("name", name);
-            callback.param("message", message);
-        }
-
-        /* コールバックの型 */
-        callback.type(JSONObject.class);
-        /* プログレスダイアログを指定 */
-        callback.progress(new ProgressDialog(this));
-        /* HTTP通信の実行 */
-        aQuery.ajax(callback);
-    }
+//    private void submitMessage(String name, String message) {
+//        /* 読み込み完了時のコールバック（ここではJSONObjectの例を示したが、JSONArrayやStringも指定可能） */
+//        AjaxCallback<JSONObject> callback = new AjaxCallback<JSONObject>() {
+//            @Override
+//            public void callback(String url, JSONObject root, AjaxStatus status) {
+//                /* HTTPステータスコードが200なら */
+//                if (status.getCode() == HttpStatus.SC_OK) {
+//                    JSONArray array = root.optJSONArray("chat");
+//                    ArrayList<Message> messageList = Message.parse(array);
+//                    MessageAdapter adapter = new MessageAdapter(MainActivity.this, messageList);
+//                    listView.setAdapter(adapter);
+//                }
+//            }
+//        };
+//        /* URLとメソッドをセット */
+//        callback.url(serverUrl);
+//        callback.method(AQuery.METHOD_GET);
+//
+//        /* パラメータをセット */
+//        if (name != null && message != null) {
+//            callback.param("name", name);
+//            callback.param("message", message);
+//        }
+//
+//        /* コールバックの型 */
+//        callback.type(JSONObject.class);
+//        /* プログレスダイアログを指定 */
+//        callback.progress(new ProgressDialog(this));
+//        /* HTTP通信の実行 */
+//        aQuery.ajax(callback);
+//    }
 
 
 
